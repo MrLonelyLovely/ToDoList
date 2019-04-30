@@ -32,7 +32,14 @@
                             <outlet property="delegate" destination="k0E-tv-Z1N" id="ATL-Ow-VtA"/>
                         </connections>
                     </tableView>
-                    <navigationItem key="navigationItem" title="ToDo" id="pXV-5l-88m"/>
+                    <navigationItem key="navigationItem" title="ToDo" id="pXV-5l-88m">
+                        <barButtonItem key="rightBarButtonItem" systemItem="add" id="n1Y-cM-5br">
+                            <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            <connections>
+                                <action selector="addButtonClicked:" destination="k0E-tv-Z1N" id="Ilw-Md-SJq"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="W9d-D0-SNE" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
@@ -47,6 +54,9 @@
                         <rect key="frame" x="0.0" y="20" width="375" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <color key="barTintColor" red="0.26054797429999998" green="0.6717340785" blue="0.96993559600000001" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
+                        <textAttributes key="titleTextAttributes">
+                            <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        </textAttributes>
                     </navigationBar>
                     <nil name="viewControllers"/>
                     <connections>

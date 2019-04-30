@@ -10,7 +10,36 @@ import UIKit
 
 class TodoListViewController: UITableViewController {
 
-    let itemArray = ["购买水杯","吃药","修改密码"]
+    @IBAction func addButtonClicked(_ sender: Any) {
+        
+        //声明一个新的变量，生存期在方法的内部
+        var textField = UITextField()
+        
+        let alert = UIAlertController(title: "添加一个新的ToDo项目", message: "", preferredStyle: .alert)
+        let action = UIAlertAction(title: "添加项目", style: .default) { (action) in
+            //用户单击添加项目按钮以后要执行的代码
+            print(textField.text!)  //test
+            
+            self.itemArray.append(textField.text!)
+            self.tableView.reloadData()  //重新载入数据来更新表格视图中所显示的数据
+            
+            
+        }
+        
+        //在对话框alert中添加一个textfield，完成闭包的参数alertTextField代表所创建的文本框对象
+        alert.addTextField { (alertTextField) in
+            alertTextField.placeholder = "创建一个新项目。"
+            //让textField指向alertTextField，因为出了闭包，alertTextField不再存在
+            textField = alertTextField
+//            print(alertTextField.text!)
+        }
+        
+        alert.addAction(action)
+        present(alert,animated: true,completion: nil)
+    }
+    
+    
+    var itemArray = ["购买水杯","吃药","修改密码"]
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -18,7 +47,7 @@ class TodoListViewController: UITableViewController {
     }
     
 //mark: - TableViewDataSource methods
-    //cellForRowAt
+    //cellForRowAt 重要方法
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "ToDoItemCell", for: indexPath)
         cell.textLabel?.text = itemArray[indexPath.row]   //每个单元格对象都会有内置的label
@@ -26,7 +55,7 @@ class TodoListViewController: UITableViewController {
         return cell
     }
 
-    //numberOfRowsInSection
+    //numberOfRowsInSection 返回一个分区的行数
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return itemArray.count
     }
