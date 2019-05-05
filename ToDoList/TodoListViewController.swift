@@ -10,6 +10,9 @@ import UIKit
 
 class TodoListViewController: UITableViewController {
 
+    //因为UserDefaults是单例模式，所以通过类方法standard获取该类的实例
+    let defaults = UserDefaults.standard
+    
     @IBAction func addButtonClicked(_ sender: Any) {
         
         //声明一个新的变量，生存期在方法的内部
@@ -21,6 +24,8 @@ class TodoListViewController: UITableViewController {
             print(textField.text!)  //test
             
             self.itemArray.append(textField.text!)
+            //通过set方法，将itemArray数组存储到UserDefaults中，与其对应的键名为ToDoListArray
+            self.defaults.set(self.itemArray,forKey:"ToDoListArray")
             self.tableView.reloadData()  //重新载入数据来更新表格视图中所显示的数据
             
             
@@ -43,7 +48,10 @@ class TodoListViewController: UITableViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view.
+        
+        if let items = defaults.array(forKey: "ToDoListArray") as? [String] {
+            itemArray = items
+        }
     }
     
 //mark: - TableViewDataSource methods
