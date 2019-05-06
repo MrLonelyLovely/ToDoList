@@ -21,8 +21,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     //当应用启动时会调用该方法，其调用级别要高于初始（Initial）视图控制器的viewDidLoad()方法
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
-        print("didFinishLaunchingWithOptions")
-        print(NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true).last! as String)
+        
+//        print("didFinishLaunchingWithOptions")
+//        print(NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true).last! as String)
+        
         return true
     }
 
