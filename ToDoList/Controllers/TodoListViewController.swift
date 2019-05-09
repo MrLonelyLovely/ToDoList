@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import CoreData
 
 class TodoListViewController: UITableViewController {
 
@@ -16,12 +17,15 @@ class TodoListViewController: UITableViewController {
 //    var itemArray = ["购买水杯","吃药","修改密码","a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s"]
     
     var itemArray = [Item]()
-
+    
+    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     
     //dataFilePath用于存储应用的document的路径
     //FileManager类用于管理应用中的文件系统，并通过default属性获取该类的实例，它是个单例类
     //在Document文件夹中创建一个新的文件，名为Items.pList,但只是生成一个地址，还没有实际创建文件
     let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.pList")
+    
+    @IBOutlet weak var searchBar: UISearchBar!
     
     @IBAction func addButtonClicked(_ sender: Any) {
         
@@ -33,8 +37,14 @@ class TodoListViewController: UITableViewController {
             //用户单击添加项目按钮以后要执行的代码
             print(textField.text!)  //test
             
-            let newItem = Item()
+//            let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+            
+            let newItem = Item(context: self.context)
+            
             newItem.title = textField.text!
+            newItem.done = false                //让done属性的默认值为false，这样不会报1570的错
+            newItem.parentCategory = self.selectedCategory  //将selectedCategory的值赋给Item对象的parentCategory关系属性
+            
             self.itemArray.append(newItem)
 //            self.itemArray.append(textField.text!)
             
@@ -78,14 +88,19 @@ class TodoListViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        
-        print(dataFilePath!)
+        print(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask))
+//        print(dataFilePath!)
         
 //        if let items = defaults.array(forKey: "ToDoListArray") as? [String] {
 //            itemArray = items
 //        }
         
-        loadItems()
+//        let request: NSFetchRequest<Item> = Item.fetchRequest()
+        
+//        loadItems()
+        
+        
+        
 //        let newItem = Item()
 //        newItem.title = "购买水杯"
 //        itemArray.append(newItem)
@@ -109,6 +124,7 @@ class TodoListViewController: UITableViewController {
 //mark: - TableViewDataSource methods
     //cellForRowAt 重要方法
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        
         let cell = tableView.dequeueReusableCell(withIdentifier: "ToDoItemCell", for: indexPath)
         cell.textLabel?.text = itemArray[indexPath.row].title   //每个单元格对象都会有内置的label
         
@@ -149,41 +165,104 @@ class TodoListViewController: UITableViewController {
 //            itemArray[indexPath.row].done = false
 //        }
         
+        //通过CoreData修改数据
+        //当用户点击某个事项后，会在该事项title的结尾处加上特定文字
+        //相关改动只会影响到context区域，直到调用save()指令前，所有的修改都不会影响到persistentContainer
+//        let title = itemArray[indexPath.row].title!
+//        itemArray[indexPath.row].setValue(title + " - (已完成）", forKey: "title")
+        
         saveItems()
-//        tableView.beginUpdates()               //通过此方法告诉表格视图，马上要更新某些单元格对象的界面了
-//        tableView.reloadRows(at: [indexPath], with: UITableView.RowAnimation.none)
-//        tableView.endUpdates()                 //更新单元格的操作结束
+        
+        tableView.beginUpdates()               //通过此方法告诉表格视图，马上要更新某些单元格对象的界面了
+        tableView.reloadRows(at: [indexPath], with: UITableView.RowAnimation.none)
+        tableView.endUpdates()                 //更新单元格的操作结束
         
         //单击单元格后灰色高亮后逐渐变淡消失
         tableView.deselectRow(at: indexPath, animated: true)
     }
 
+    //Mark : - nscoder方法
+    
     func saveItems() {
-        let encoder = PropertyListEncoder()
+//        let encoder = PropertyListEncoder()
         do {
-            let data = try encoder.encode(itemArray)
-            try data.write(to: dataFilePath!)
+//            let data = try encoder.encode(itemArray)
+//            try data.write(to: dataFilePath!)
+//            let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+            try context.save()
         } catch {
-            print("编码错误：\(error)")
+//            print("编码错误：\(error)")
+            print("保存context错误：\(error)")
         }
+        tableView.reloadData()
     }
     
     //从磁盘上的Items.pList文件读取之前保存的Item类型的数据
-    func loadItems() {
-        //try后不加问号会报错，如下：
-        //Errors thrown from here are not handled
-        //Initializer for conditional binding must have Optional type, not 'Data'
-        //因为Data的初始化方法是throw类型，所以需要使用try命令；
-        //又因为其生成的对象是可选类型，所以这里又使用可选绑定将其拆包
-        //如果从Item.pList读出了数据，则会执行if语句体中的代码
-        if let data = try? Data(contentsOf: dataFilePath!){
-            let decoder = PropertyListDecoder()
-            do {
-                itemArray = try decoder.decode([Item].self, from: data)
-            } catch {
-                print("解码item错误！")
-            }
+//    func loadItems() {
+//        //try后不加问号会报错，如下：
+//        //Errors thrown from here are not handled
+//        //Initializer for conditional binding must have Optional type, not 'Data'
+//        //因为Data的初始化方法是throw类型，所以需要使用try命令；
+//        //又因为其生成的对象是可选类型，所以这里又使用可选绑定将其拆包
+//        //如果从Item.pList读出了数据，则会执行if语句体中的代码
+//        if let data = try? Data(contentsOf: dataFilePath!){
+//            let decoder = PropertyListDecoder()
+//            do {
+//                itemArray = try decoder.decode([Item].self, from: data)
+//            } catch {
+//                print("解码item错误！")
+//            }
+//        }
+//    }
+    
+    // = Item.fetchRequest() 如果不输入参数，则此为参数的默认值
+    func loadItems(with request: NSFetchRequest<Item> = Item.fetchRequest(),predicate: NSPredicate? = nil ) {
+//        let request: NSFetchRequest<Item> = Item.fetchRequest()
+        //过滤
+        let categoryPredicate = NSPredicate(format: "parentCategory.name MATCHES %@", selectedCategory!.name!)
+        if let addtionalPredicate = predicate {
+            request.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [categoryPredicate,addtionalPredicate])
+        }
+        
+        do {
+            itemArray = try context.fetch(request)
+        } catch {
+            print("从context获取数据错误：\(error)")
+        }
+        tableView.reloadData()
+    }
+    
+    //?????
+    var selectedCategory: Category? {
+        didSet {
+            loadItems()
         }
     }
 }
 
+extension TodoListViewController: UISearchBarDelegate {
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        let request: NSFetchRequest<Item> = Item.fetchRequest()
+        
+        request.predicate = NSPredicate(format: "title CONTAINS[c] %@", searchBar.text!) //***谓词过滤语句
+        
+        request.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]        //对搜索到的Item对象按照title属性增量排序
+        
+        loadItems(with: request)
+        
+        print(searchBar.text!)
+    }
+    
+    //一旦搜索栏中的文字内容发生了变化，就会调用该方法。
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        if searchBar.text?.count == 0 {    //若搜索栏为空
+            loadItems()                    //则显示所有事项
+            DispatchQueue.main.async {
+                searchBar.resignFirstResponder()
+            }
+        }
+    }
+    
+    
+    
+}
